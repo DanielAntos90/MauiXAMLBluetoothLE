@@ -42,8 +42,8 @@ public class BluetoothLEService
                     await ShowToastAsync($"Found {systemDevice.State.ToString().ToLower()} device {systemDevice.Name}.");
                 }
             }
-            await Adapter.StartScanningForDevicesAsync(HeartRateUuids.HeartRateServiceUuids);
-        }
+            await Adapter.StartScanningForDevicesAsync();//.StartScanningForDevicesAsync(HeartRateUuids.HeartRateServiceUuids);
+         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Unable to scan nearby Bluetooth LE devices: {ex.Message}.");
@@ -167,7 +167,7 @@ public class BluetoothLEService
 #elif WINDOWS
 #endif
 
-    public async Task ShowToastAsync(string message)
+    public static async Task ShowToastAsync(string message)
     {
         ToastDuration toastDuration = ToastDuration.Long;
         IToast toast = Toast.Make(message, toastDuration);
