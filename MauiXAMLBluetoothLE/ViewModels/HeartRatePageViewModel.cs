@@ -114,9 +114,19 @@ public partial class HeartRatePageViewModel : BaseViewModel
                             await SecureStorage.Default.SetAsync("device_name", $"{BluetoothLEService.Device.Name}");
                             await SecureStorage.Default.SetAsync("device_id", $"{BluetoothLEService.Device.Id}");
                             #endregion save device id to storage
-                            
-                           // HeartRateMeasurementCharacteristic.ValueUpdated += HeartRateMeasurementCharacteristic_ValueUpdated;
-                           // await HeartRateMeasurementCharacteristic.StartUpdatesAsync();
+                            await send();
+
+                            HeartRateMeasurementCharacteristic.ValueUpdated += HeartRateMeasurementCharacteristic_ValueUpdated;
+                             /*  {
+                                   var bytes = args.Characteristic.Value;
+                                   var a = BitConverter.ToString(bytes);
+                                   Debug.WriteLine(a);
+
+                               };*/
+
+                                await HeartRateMeasurementCharacteristic.StartUpdatesAsync(); 
+
+                            //await receive();
 
                         }
                     }
@@ -132,17 +142,17 @@ public partial class HeartRatePageViewModel : BaseViewModel
         {
             IsBusy = false;
         }
-        await send();
     }
 
     private void HeartRateMeasurementCharacteristic_ValueUpdated(object sender, CharacteristicUpdatedEventArgs e)
     {
         //    ArduinoOutputs;22:27;30.03.2023;10:00;19:00;42;42;led off
         var bytes = e.Characteristic.Value;
-        const byte heartRateValueFormat = 0x01;
+        string str = Encoding.UTF8.GetString(bytes);
+        //const byte heartRateValueFormat = 0x01;
 
-        byte flags = bytes[0];
-        bool isHeartRateValueSizeLong = (flags & heartRateValueFormat) != 0;
+        //byte flags = bytes[0];
+        //bool isHeartRateValueSizeLong = (flags & heartRateValueFormat) != 0;
         //HeartRateValue = isHeartRateValueSizeLong ? BitConverter.ToUInt16(bytes, 1) : bytes[1];
         Timestamp = DateTimeOffset.Now.LocalDateTime;
     }
@@ -150,6 +160,12 @@ public partial class HeartRatePageViewModel : BaseViewModel
     {
         byte[] data = Encoding.UTF8.GetBytes("inputs");
         await HeartRateMeasurementCharacteristic.WriteAsync(data);
+    }
+    private async Task receive()
+    {
+        var bytes = await HeartRateMeasurementCharacteristic.ReadAsync();
+        var a = BitConverter.ToString(bytes);
+        HeartRateValue = 0;
     }
 
     private async Task DisconnectFromDeviceAsync()
