@@ -1,4 +1,7 @@
-﻿namespace MauiXAMLBluetoothLE.ViewModels;
+﻿
+using System.Text;
+
+namespace MauiXAMLBluetoothLE.ViewModels;
 
 public partial class HeartRatePageViewModel : BaseViewModel
 {
@@ -95,10 +98,12 @@ public partial class HeartRatePageViewModel : BaseViewModel
 
             if (BluetoothLEService.Device.State == DeviceState.Connected)
             {
-                HeartRateService = await BluetoothLEService.Device.GetServiceAsync(HeartRateUuids.HeartRateServiceUuid);
+                var services = await BluetoothLEService.Device.GetServicesAsync();
+                HeartRateService = await BluetoothLEService.Device.GetServiceAsync(HeartRateUuids.TISensorTagSmartKeys);
                 if (HeartRateService != null)
                 {
-                    HeartRateMeasurementCharacteristic = await HeartRateService.GetCharacteristicAsync(HeartRateUuids.HeartRateMeasurementCharacteristicUuid);
+                    var characteristics = await HeartRateService.GetCharacteristicsAsync();
+                    HeartRateMeasurementCharacteristic = await HeartRateService.GetCharacteristicAsync(HeartRateUuids.TXRX);
                     if (HeartRateMeasurementCharacteristic != null)
                     {
                         if (HeartRateMeasurementCharacteristic.CanUpdate)
@@ -109,9 +114,10 @@ public partial class HeartRatePageViewModel : BaseViewModel
                             await SecureStorage.Default.SetAsync("device_name", $"{BluetoothLEService.Device.Name}");
                             await SecureStorage.Default.SetAsync("device_id", $"{BluetoothLEService.Device.Id}");
                             #endregion save device id to storage
+                            
+                           // HeartRateMeasurementCharacteristic.ValueUpdated += HeartRateMeasurementCharacteristic_ValueUpdated;
+                           // await HeartRateMeasurementCharacteristic.StartUpdatesAsync();
 
-                            HeartRateMeasurementCharacteristic.ValueUpdated += HeartRateMeasurementCharacteristic_ValueUpdated;
-                            await HeartRateMeasurementCharacteristic.StartUpdatesAsync();
                         }
                     }
                 }
@@ -126,17 +132,24 @@ public partial class HeartRatePageViewModel : BaseViewModel
         {
             IsBusy = false;
         }
+        await send();
     }
 
     private void HeartRateMeasurementCharacteristic_ValueUpdated(object sender, CharacteristicUpdatedEventArgs e)
     {
+        //    ArduinoOutputs;22:27;30.03.2023;10:00;19:00;42;42;led off
         var bytes = e.Characteristic.Value;
         const byte heartRateValueFormat = 0x01;
 
         byte flags = bytes[0];
         bool isHeartRateValueSizeLong = (flags & heartRateValueFormat) != 0;
-        HeartRateValue = isHeartRateValueSizeLong ? BitConverter.ToUInt16(bytes, 1) : bytes[1];
+        //HeartRateValue = isHeartRateValueSizeLong ? BitConverter.ToUInt16(bytes, 1) : bytes[1];
         Timestamp = DateTimeOffset.Now.LocalDateTime;
+    }
+    private async Task send()
+    {
+        byte[] data = Encoding.UTF8.GetBytes("inputs");
+        await HeartRateMeasurementCharacteristic.WriteAsync(data);
     }
 
     private async Task DisconnectFromDeviceAsync()

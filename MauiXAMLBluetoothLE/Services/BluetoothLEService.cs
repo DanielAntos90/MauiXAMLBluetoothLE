@@ -39,7 +39,7 @@ public class BluetoothLEService
                         Id = systemDevice.Id,
                         Name = systemDevice.Name,
                     });
-                    await ShowToastAsync($"Found {systemDevice.State.ToString().ToLower()} device {systemDevice.Name}.");
+                    //await ShowToastAsync($"Found {systemDevice.State.ToString().ToLower()} device {systemDevice.Name}.");
                 }
             }
             await Adapter.StartScanningForDevicesAsync();//.StartScanningForDevicesAsync(HeartRateUuids.HeartRateServiceUuids);
@@ -64,7 +64,7 @@ public class BluetoothLEService
                 Id = e.Device.Id,
                 Name = e.Device.Name,
             });
-            await ShowToastAsync($"Found {e.Device.State.ToString().ToLower()} {e.Device.Name}.");
+            //await ShowToastAsync($"Found {e.Device.State.ToString().ToLower()} {e.Device.Name}.");
         }
     }
 
@@ -74,11 +74,11 @@ public class BluetoothLEService
         {
             try
             {
-                await ShowToastAsync($"{e.Device.Name} connection is lost.");
+                //await ShowToastAsync($"{e.Device.Name} connection is lost.");
             }
             catch
             {
-                await ShowToastAsync($"Device connection is lost.");
+                //await ShowToastAsync($"Device connection is lost.");
             }
         });
     }
@@ -89,11 +89,11 @@ public class BluetoothLEService
         {
             try
             {
-                await ShowToastAsync($"{e.Device.Name} is connected.");
+                //await ShowToastAsync($"{e.Device.Name} is connected.");
             }
             catch
             {
-                await ShowToastAsync($"Device is connected.");
+                //await ShowToastAsync($"Device is connected.");
             }
         });
     }
@@ -104,11 +104,11 @@ public class BluetoothLEService
         {
             try
             {
-                await ShowToastAsync($"{e.Device.Name} is disconnected.");
+                //await ShowToastAsync($"{e.Device.Name} is disconnected.");
             }
             catch
             {
-                await ShowToastAsync($"Device is disconnected.");
+                //await ShowToastAsync($"Device is disconnected.");
             }
         });
     }
